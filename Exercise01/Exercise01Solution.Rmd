@@ -213,7 +213,7 @@ lines(seq(1.8, 2.3, by = 0.01), dnorm(seq(1.8, 2.3, by = 0.01), mean= TheoMeanSl
 
 ```
 
-Errors do not all have the same constant variance, ie. hetroscedasity. Mean of slopes still valid but variance is inccorect (potentially along with shape?).
+Errors do not all have the same constant variance, ie. heteroscedasticity Mean of slopes still valid but variance is inccorect (potentially along with shape?).
 
 ### (d)
 
@@ -248,7 +248,7 @@ lines(seq(1.8, 2.3, by = 0.01), dnorm(seq(1.8, 2.3, by = 0.01), mean= TheoMeanSl
 
 ```
 
-Here, again, we have hetroscedascity as the error $\xi_i$ depends on $x_i$ (larger error for larger x). They are still centered on zero. Mean of $\hat{\beta}_2$ distribution remains intact but not the shape and variance.
+Here, again, we have heteroscedasticity as the error $\xi_i$ depends on $x_i$ (larger error for larger x). They are still centered on zero. Mean of $\hat{\beta}_2$ distribution remains intact but not the shape and variance.
 
 
 
