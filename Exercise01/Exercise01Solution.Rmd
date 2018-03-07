@@ -1,11 +1,17 @@
 ---
 title: "Exercise01Solution"
-output: html_document
+author: "Brian Regan"
+date: "Wednesday, March 7th, 2018"
+output:
+  html_document:
+    theme: cosmo
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+
 ```
+# {.tabset}
 
 ## Question 1
 
