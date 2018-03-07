@@ -1,0 +1,248 @@
+---
+title: "Exercise01Solution"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Question 1
+
+### (a)
+
+### (b)
+
+$Intercept \approx 680$, $Slope \approx 15$
+
+### (c) 
+
+### (d) 
+
+15 cows $\implies$ \$905 
+
+100 cows $\implies$ \$2180
+
+100 is very far outside of the range of the original data and so may not be a meaningful estimate.
+
+
+## Question 2
+
+| Function      | Transformation | Linear Form  |
+| ------------- |:--------------:| ------------:|
+| $y = \alpha x^\beta$      | $y' = log(y), x' = log(x)$  | $y' = log(\alpha) + \beta.x'$        |
+| $y = \alpha e^{\beta.x}$     | $y' = log(y)$       |   $y' = log(\alpha) + \beta.x$        |
+| $y = \alpha + \beta.log(x)$ | $x' = log(x)$      |    $y = \alpha + \beta.x'$        |
+| $y = 1/(\alpha + \beta e^{-x})$ | $y' = y^{-1}, x' = e^{-x}$ | $y' = \alpha + \beta.x'$
+
+
+## Question 3
+
+Run 100 iterations of regression on (x, y) pairs.
+```{r}
+
+# Initialise Fixed X vales
+iters = 100
+x   <- seq(1, 40, 1)  
+betas <- numeric(iters)
+
+# Conduct 100 Regressions
+for(i in 1:iters){
+  
+  # Generate y's by linear function(x) + error
+  y   <- 1 + 2 * x + 5 * rnorm(length(x)) 
+  
+  # Fit regression line
+  reg <- lm(y ~ x)
+  betas[i] = reg$coefficients['x']
+}
+
+```
+
+### (a) 
+Plot the final regression and its Tukey-Anscombe plot.
+```{r}
+plot(x, y)
+abline(reg)
+plot(reg, which = 1)
+```
+
+
+### (b)
+Compute Mean and Standard Deviation of the slopes
+```{r}
+slopeMean <- mean(betas)
+slopeSD <- sd(betas)
+
+sprintf('Mean of Slopes: %f',slopeMean)
+sprintf('Standard Deviation of Slopes: %f', slopeSD)
+
+```
+
+### (c)
+
+Calculate the theroretical variance of the slope.
+$Var(\hat{\beta}_2) = \frac{\sigma^2}{\sum (x_i - \bar{x})}$
+
+```{r}
+TheoMeanSlope = 2
+TheoVarSlope= (5**2)/sum((x - mean(x))**2)
+sprintf('Theoretical Variance of Slopes: %f', TheoVarSlope)
+
+```
+
+
+### (d)
+```{r}
+
+hist(betas, freq = FALSE)
+lines(seq(1.8, 2.3, by = 0.01), dnorm(seq(1.8, 2.3, by = 0.01), mean= TheoMeanSlope, sd = sqrt(TheoVarSlope)))
+
+```
+
+
+## Question 4
+
+### (a)
+Non-normal errors
+
+```{r}
+
+# Conduct 100 Regressions
+for(i in 1:iters){
+  
+  # Generate y's by linear function(x) + error
+  y <- 1 + 2 * x + 5 * (1 - rchisq(length(x), df = 1)) / sqrt(2)
+  
+  # Fit regression line
+  reg <- lm(y ~ x)
+  betas[i] = reg$coefficients['x']
+}
+
+plot(x, y)
+abline(reg)
+plot(reg, which = 1)
+
+slopeMean <- mean(betas)
+slopeSD <- sd(betas)
+
+sprintf('Mean of Slopes: %f',slopeMean)
+sprintf('Standard Deviation of Slopes: %f', slopeSD)
+
+hist(betas, freq = FALSE)
+lines(seq(1.8, 2.3, by = 0.01), dnorm(seq(1.8, 2.3, by = 0.01), mean= TheoMeanSlope, sd = sqrt(TheoVarSlope)))
+
+
+```
+
+Here the error distribution is changed to 1- a chisquared distribution. Its mean remains the same but variance and shape change dramatically as can be seen in the Tikey-Anscombe plot (non normal errors) and the histogram of slopes (non normal shape).
+
+### (b)
+Errors with non-zero mean
+
+```{r}
+
+# Conduct 100 Regressions
+for(i in 1:iters){
+  
+  # Generate y's by linear function(x) + error
+  y <- 1 + 2 * x + 5 * rnorm(length(x), mean = x^2 / 40 - 1, sd = 1)
+  
+  # Fit regression line
+  reg <- lm(y ~ x)
+  betas[i] = reg$coefficients['x']
+}
+
+plot(x, y)
+abline(reg)
+plot(reg, which = 1)
+
+slopeMean <- mean(betas)
+slopeSD <- sd(betas)
+
+sprintf('Mean of Slopes: %f',slopeMean)
+sprintf('Standard Deviation of Slopes: %f', slopeSD)
+
+hist(betas, freq = FALSE)
+lines(seq(1.8, 2.3, by = 0.01), dnorm(seq(1.8, 2.3, by = 0.01), mean= TheoMeanSlope, sd = sqrt(TheoVarSlope)))
+
+
+```
+
+The expected value of the error for observation i depends on $x_i$ and so the errors are not iid. Shape, mean and variance of the distribution of $\hat{\beta}_2$ are affected.
+
+
+### (c)
+
+Non constant error variance.
+
+```{r}
+
+# Conduct 100 Regressions
+for(i in 1:iters){
+  
+  # Generate y's by linear function(x) + error
+  require(MASS)
+        Sigma <- toeplitz(c(seq(from = 1, to = 0, by = -0.1), rep(0, 29)))
+        y   <- 1 + 2 * x + 5 * mvrnorm(n = 1, mu = rep(0, length(x)), Sigma = Sigma)
+  
+  # Fit regression line
+  reg <- lm(y ~ x)
+  betas[i] = reg$coefficients['x']
+}
+
+plot(x, y)
+abline(reg)
+plot(reg, which = 1)
+
+slopeMean <- mean(betas)
+slopeSD <- sd(betas)
+
+sprintf('Mean of Slopes: %f',slopeMean)
+sprintf('Standard Deviation of Slopes: %f', slopeSD)
+
+hist(betas, freq = FALSE)
+lines(seq(1.8, 2.3, by = 0.01), dnorm(seq(1.8, 2.3, by = 0.01), mean= TheoMeanSlope, sd = sqrt(TheoVarSlope)))
+
+
+```
+
+Errors do not all have the same constant variance, ie. hetroscedasity. Mean of slopes still valid but variance is inccorect (potentially along with shape?).
+
+### (d)
+
+Non constant (x dependent) variance of errors.
+
+```{r}
+
+# Conduct 100 Regressions
+for(i in 1:iters){
+  
+  # Generate y's by linear function(x) + error
+  y <- 1 + 2 * x + 5 * rnorm(length(x), mean = 0, sd = x / 20)
+  
+  # Fit regression line
+  reg <- lm(y ~ x)
+  betas[i] = reg$coefficients['x']
+}
+
+plot(x, y)
+abline(reg)
+plot(reg, which = 1)
+
+slopeMean <- mean(betas)
+slopeSD <- sd(betas)
+
+sprintf('Mean of Slopes: %f',slopeMean)
+sprintf('Standard Deviation of Slopes: %f', slopeSD)
+
+hist(betas, freq = FALSE)
+lines(seq(1.8, 2.3, by = 0.01), dnorm(seq(1.8, 2.3, by = 0.01), mean= TheoMeanSlope, sd = sqrt(TheoVarSlope)))
+
+
+```
+
+Here, again, we have hetroscedascity as the error $\xi_i$ depends on $x_i$ (larger error for larger x). They are still centered on zero. Mean of $\hat{\beta}_2$ distribution remains intact but not the shape and variance.
+
+
+
